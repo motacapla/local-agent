@@ -1,7 +1,8 @@
 [scripts]
+main = "python src/main.py"
 tools = "python src/tools.py"
 agent = "python src/agent.py"
-test = "python src/test.py"
+tts = "python src/tts.py"
 
 [packages]
 langchain = "*"
@@ -17,6 +18,8 @@ ipython = "*"
 playsound = "*"
 pyobjc = "*"
 langchain-anthropic = "*"
+uvicorn = "*"
+fastapi = "*"
 
 [dev-packages]
 ipykernel = "*"

@@ -1,5 +1,5 @@
 import uuid
-from typing import Annotated
+from typing import Annotated, AsyncGenerator, Dict, Any, List
 
 from langchain_anthropic import ChatAnthropic
 from langchain_openai import ChatOpenAI
@@ -22,15 +22,15 @@ class State(TypedDict):
 
 class SimpleAgentGraph:
     def __init__(self):
-        def chatbot(state: State):
-            return {"messages": [self.llm.invoke(state["messages"])]}
+        async def chatbot(state: State):
+            return {"messages": [await self.llm.ainvoke(state["messages"])]}
 
+        # BUG: LangChainの不具合により、ChatOllamaクラスで.bind_tools()するとstreamingできない
         tools = my_tools.get_tools()
-
         self.llm = ChatOllama(
-            model="qwen2.5:7b",  # model="llama3.2",
+            model="qwen3:4b",
             temperature=0.2,
-        ).bind_tools(tools)
+        )  # .bind_tools(tools)
 
         self.graph = StateGraph(State)
 
@@ -51,9 +51,8 @@ class SimpleAgentGraph:
 
         self.config = {"configurable": {"thread_id": str(uuid.uuid4())}}
 
-    def run(self, message: str):
-
-        events = self.graph.stream(
+    async def run(self, message: str):
+        async for msg, _ in self.graph.astream(
             {
                 "messages": [
                     {
@@ -66,6 +65,10 @@ class SimpleAgentGraph:
                 ],
             },
             self.config,
-            # stream_mode="values",
-        )
-        return events
+            # stream_mode="updates",
+            stream_mode="messages",
+        ):
+            if msg.content:
+                # print(msg.content, end="|", flush=True)
+                yield msg.content
+        # yield events

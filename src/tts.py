@@ -137,5 +137,5 @@ def text_to_speech(text, speaker=1):
 
 
 if __name__ == "__main__":
-    text = "こんにちは、VOICEVOXでテキストを音声に変換しています。"
+    text = "ぽぽぽぽーん"
     text_to_speech(text)
